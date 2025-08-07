@@ -21,7 +21,8 @@ import { getApiEndpoint } from './../api.js';
   const SELECTOR_STANDARD = '[data-uia="controls-standard"]';
   const SELECTOR_EPISODE = '[data-uia="control-episodes"]';
   const SELECTOR_FWD10 = '[data-uia="control-forward10"]';
-
+  const SELECTOR_AUDIO_SUBTITLE_CONTROL= '[data-uia="control-audio-subtitle"]';
+  const SELECTOR_VIDEOTITTLE= '[data-uia="video-title"]';
   const COLOR_DEFAULT = window.COLOR_DETAIL_DEFAULT || "#FFFFFF";
   const COLOR_LOOPING = window.COLOR_DETAIL_ACTIVE || "#FF0000";
   let isLooping = false;
@@ -31,7 +32,7 @@ import { getApiEndpoint } from './../api.js';
     const svgIcon = window.createMoreDetailSVG(COLOR_DEFAULT);
     const btn = document.createElement("button");
     btn.id = BUTTON_ID;
-    btn.setAttribute("aria-label", "メモサイドバー開閉");
+    btn.setAttribute("aria-label", "サイドバー開閉");
     btn.appendChild(svgIcon);
     btn.style.cursor = "pointer";
     btn.addEventListener("click", () => {
@@ -59,24 +60,24 @@ import { getApiEndpoint } from './../api.js';
 
   const uiObserver = new MutationObserver(() => {
     const controls = document.querySelector(SELECTOR_STANDARD);
-    const episodeBtn = document.querySelector(SELECTOR_EPISODE);
-
+    const targetBtn = document.querySelector(SELECTOR_EPISODE) || document.querySelector(SELECTOR_AUDIO_SUBTITLE_CONTROL);
+    
     const loopBtnExists = document.getElementById(BUTTON_ID);
     const nextBtnExists = document.getElementById(NEXT_BUTTON_ID);
 
-    if (controls && episodeBtn && (!loopBtnExists || !nextBtnExists)) {
+    if (controls && targetBtn && (!loopBtnExists || !nextBtnExists)) {
       const { btn: loopButton, svg: loopSvg } = createLoopButton();
       const { btn: playNextClipButton, svg: playSvg } = createPlayNextClipButton();
 
-      loopButton.className = episodeBtn.className;
-      playNextClipButton.className = episodeBtn.className;
+      loopButton.className = targetBtn.className;
+      playNextClipButton.className = targetBtn.className;
 
       // SVGの色を設定（再描画時にも反映）
       loopSvg.style.color = isLooping ? COLOR_LOOPING : COLOR_DEFAULT;
       playSvg.style.color = togglekey ? COLOR_LOOPING : COLOR_DEFAULT;
 
       const wrapper = document.createElement("div");
-      wrapper.className = episodeBtn.parentNode.className;
+      wrapper.className = targetBtn.parentNode.className;
       wrapper.style.display = "flex";
       wrapper.style.alignItems = "center";
       wrapper.style.gap = "0.5rem";
@@ -88,11 +89,11 @@ import { getApiEndpoint } from './../api.js';
       wrapper.appendChild(loopButton);
       wrapper.appendChild(separator);
       wrapper.appendChild(playNextClipButton);
-      episodeBtn.parentNode.after(wrapper);
+      targetBtn.parentNode.after(wrapper);
 
       const spacer = document.createElement("div");
       spacer.style.minWidth = "3rem";
-      episodeBtn.parentNode.after(spacer);
+      targetBtn.parentNode.after(spacer);
     }
 
     // プレイヤーUIが消えた時にボタンも消す
